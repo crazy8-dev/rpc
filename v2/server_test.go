@@ -40,13 +40,13 @@ func TestRegisterService(t *testing.T) {
 
 	// Inferred name.
 	err = s.RegisterService(service1, "")
-	if err != nil || !s.HasMethod("Service1.Multiply") {
-		t.Errorf("Expected to be registered: Service1.Multiply")
+	if err != nil || !s.HasMethod("Service1.multiply") {
+		t.Errorf("Expected to be registered: Service1.multiply")
 	}
 	// Provided name.
 	err = s.RegisterService(service1, "Foo")
-	if err != nil || !s.HasMethod("Foo.Multiply") {
-		t.Errorf("Expected to be registered: Foo.Multiply")
+	if err != nil || !s.HasMethod("Foo.multiply") {
+		t.Errorf("Expected to be registered: Foo.multiply")
 	}
 	// No methods.
 	err = s.RegisterService(service2, "")
@@ -69,7 +69,7 @@ type MockCodecRequest struct {
 }
 
 func (r MockCodecRequest) Method() (string, error) {
-	return "Service1.Multiply", nil
+	return "Service1.multiply", nil
 }
 
 func (r MockCodecRequest) ReadRequest(args interface{}) error {
