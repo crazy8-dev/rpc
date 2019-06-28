@@ -101,7 +101,7 @@ func (m *serviceMap) register(rcvr interface{}, name string) error {
 		if returnType := mtype.Out(0); returnType != typeOfError {
 			continue
 		}
-		s.methods[method.Name] = &serviceMethod{
+		s.methods[lowerFirst(method.Name)] = &serviceMethod{
 			method:    method,
 			argsType:  args.Elem(),
 			replyType: reply.Elem(),
@@ -161,4 +161,8 @@ func isExportedOrBuiltin(t reflect.Type) bool {
 	// PkgPath will be non-empty even for an exported type,
 	// so we need to check the type name as well.
 	return isExported(t.Name()) || t.PkgPath() == ""
+}
+
+func lowerFirst(name string) string {
+	return strings.ToLower(name[0:1]) + name[1:]
 }
