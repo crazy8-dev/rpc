@@ -28,6 +28,8 @@ type CodecRequest interface {
 	Method() (string, error)
 	// Reads request filling the RPC method args.
 	ReadRequest(interface{}) error
+	// Get request body.
+	GetFullRequest() interface{}
 	// Writes response using the RPC method reply. The error parameter is
 	// the error returned by the method call, if any.
 	WriteResponse(http.ResponseWriter, interface{}, error) error
@@ -220,6 +222,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			serviceSpec.rcvr,
 			reflect.ValueOf(r),
 			args,
+			reflect.ValueOf(codecReq.GetFullRequest()),
 			reply,
 		})
 	} else {

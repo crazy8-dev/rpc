@@ -19,8 +19,8 @@ var Version = "2.0"
 // Request and Response
 // ----------------------------------------------------------------------------
 
-// serverRequest represents a JSON-RPC request received by the server.
-type serverRequest struct {
+// ServerRequest represents a JSON-RPC request received by the server.
+type ServerRequest struct {
 	// JSON-RPC protocol.
 	Version string `json:"jsonrpc"`
 
@@ -100,7 +100,7 @@ func (c *Codec) NewRequest(r *http.Request) rpc.CodecRequest {
 // newCodecRequest returns a new CodecRequest.
 func newCodecRequest(r *http.Request, encoder rpc.Encoder, errorMapper func(error) error) rpc.CodecRequest {
 	// Decode the request body and check if RPC method is valid.
-	req := new(serverRequest)
+	req := new(ServerRequest)
 	err := json.NewDecoder(r.Body).Decode(req)
 
 	if err != nil {
@@ -123,10 +123,14 @@ func newCodecRequest(r *http.Request, encoder rpc.Encoder, errorMapper func(erro
 
 // CodecRequest decodes and encodes a single request.
 type CodecRequest struct {
-	request     *serverRequest
+	request     *ServerRequest
 	err         error
 	encoder     rpc.Encoder
 	errorMapper func(error) error
+}
+
+func (c *CodecRequest) GetFullRequest() interface{} {
+	return &c.request
 }
 
 // Method returns the RPC method for the current request.

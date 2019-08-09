@@ -6,6 +6,7 @@
 package rpc
 
 import (
+	"github.com/insolar/rpc/v2/json2"
 	"net/http"
 	"strconv"
 	"testing"
@@ -23,12 +24,12 @@ type Service1Response struct {
 type Service1 struct {
 }
 
-func (t *Service1) Multiply(r *http.Request, req *Service1Request, res *Service1Response) error {
+func (t *Service1) Multiply(r *http.Request, req *Service1Request, fullReq *json2.ServerRequest, res *Service1Response) error {
 	res.Result = req.A * req.B
 	return nil
 }
 
-func (t *Service1) Add(req *Service1Request, res *Service1Response) error {
+func (t *Service1) Add(req *Service1Request, fullReq *json2.ServerRequest, res *Service1Response) error {
 	res.Result = req.A + req.B
 	return nil
 }
@@ -45,7 +46,7 @@ func TestRegisterService(t *testing.T) {
 	// Inferred name.
 	err = s.RegisterService(service1, "")
 	if err != nil || !s.HasMethod("Service1.Multiply") {
-		t.Errorf("Expected to be registered: Service1.Multiply")
+		t.Errorf(err.Error())
 	}
 	// Provided name.
 	err = s.RegisterService(service1, "Foo")
@@ -97,6 +98,10 @@ type MockCodecRequest struct {
 
 func (r MockCodecRequest) Method() (string, error) {
 	return "Service1.Multiply", nil
+}
+
+func (c MockCodecRequest) GetFullRequest() interface{} {
+	return &c.A
 }
 
 func (r MockCodecRequest) ReadRequest(args interface{}) error {

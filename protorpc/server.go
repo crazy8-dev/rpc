@@ -9,11 +9,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/insolar/rpc"
 	"io"
 	"net/http"
 	"strings"
-
-	"github.com/gorilla/rpc"
 )
 
 var null = json.RawMessage([]byte("null"))
@@ -100,6 +99,10 @@ func (c *CodecRequest) Method() (string, error) {
 		return c.request.Method, nil
 	}
 	return "", c.err
+}
+
+func (c *CodecRequest) GetFullRequest() interface{} {
+	return &c.request
 }
 
 // ReadRequest fills the request object for the RPC method.
