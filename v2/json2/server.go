@@ -106,6 +106,7 @@ func newCodecRequest(r *http.Request, encoder rpc.Encoder, errorMapper func(erro
 	if err != nil {
 		return &CodecRequest{body: body, request: req, err: err, encoder: encoder, errorMapper: errorMapper}
 	}
+	r.Body.Close()
 	err = json.Unmarshal(body, req)
 
 	if err != nil {
@@ -122,7 +123,6 @@ func newCodecRequest(r *http.Request, encoder rpc.Encoder, errorMapper func(erro
 		}
 	}
 
-	r.Body.Close()
 	return &CodecRequest{body: body, request: req, err: err, encoder: encoder, errorMapper: errorMapper}
 }
 

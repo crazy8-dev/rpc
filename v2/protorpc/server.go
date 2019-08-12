@@ -80,12 +80,12 @@ func newCodecRequest(r *http.Request) rpc.CodecRequest {
 	req.Method = path[index+1:]
 
 	body, err := ioutil.ReadAll(r.Body)
+	r.Body.Close()
 	if err != nil {
 		return &CodecRequest{body: body, request: req, err: err}
 	}
 	err = json.Unmarshal(body, &req.Params)
 
-	r.Body.Close()
 	var errr error
 	if err != io.EOF {
 		errr = err

@@ -34,18 +34,12 @@ func (e *Error) Error() string {
 
 // serverRequest represents a JSON-RPC request received by the server.
 type serverRequest struct {
-	// JSON-RPC protocol.
-	Version string `json:"jsonrpc"`
-
 	// A String containing the name of the method to be invoked.
 	Method string `json:"method"`
-
-	// A Structured value to pass as arguments to the method.
-	Params *json.RawMessage `json:"params,omitempty"`
-
-	// The request id. MUST be a string, number or null.
-	// Our implementation will not do type checking for id.
-	// It will be copied as it is.
+	// An Array of objects to pass as arguments to the method.
+	Params *json.RawMessage `json:"params"`
+	// The request id. This can be of any type. It is used to match the
+	// response with the request that it is replying to.
 	Id *json.RawMessage `json:"id"`
 }
 
@@ -88,11 +82,11 @@ func newCodecRequest(r *http.Request) rpc.CodecRequest {
 	// Decode the request body and check if RPC method is valid.
 	req := new(serverRequest)
 	body, err := ioutil.ReadAll(r.Body)
+	r.Body.Close()
 	if err != nil {
 		return &CodecRequest{body: body, request: req, err: err}
 	}
 	err = json.Unmarshal(body, req)
-	r.Body.Close()
 	return &CodecRequest{body: body, request: req, err: err}
 }
 
