@@ -39,7 +39,7 @@ func (t *Service1) Multiply(r *http.Request, req *Service1Request, fullReq *Serv
 	return nil
 }
 
-func (t *Service1) ResponseError(r *http.Request, req *Service1Request, res *Service1Response) error {
+func (t *Service1) ResponseError(r *http.Request, req *Service1Request, fullReq *ServerRequest, res *Service1Response) error {
 	return ErrResponseError
 }
 
