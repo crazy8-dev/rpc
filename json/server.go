@@ -23,7 +23,7 @@ type ServerRequest struct {
 	// A String containing the name of the method to be invoked.
 	Method string `json:"method"`
 	// An Array of objects to pass as arguments to the method.
-	Params *json.RawMessage `json:"params"`
+	Params *json.RawMessage `json:"params,omitempty"`
 	// The request id. This can be of any type. It is used to match the
 	// response with the request that it is replying to.
 	Id *json.RawMessage `json:"id"`

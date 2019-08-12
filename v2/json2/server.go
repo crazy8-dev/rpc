@@ -28,7 +28,7 @@ type ServerRequest struct {
 	Method string `json:"method"`
 
 	// A Structured value to pass as arguments to the method.
-	Params *json.RawMessage `json:"params"`
+	Params *json.RawMessage `json:"params,omitempty"`
 
 	// The request id. MUST be a string, number or null.
 	// Our implementation will not do type checking for id.
