@@ -74,7 +74,7 @@ func newCodecRequest(r *http.Request) rpc.CodecRequest {
 	path := r.URL.Path
 	index := strings.LastIndex(path, "/")
 	if index < 0 {
-		return &CodecRequest{request: *req, err: fmt.Errorf("rpc: no method: %s", path)}
+		return &CodecRequest{request: req, err: fmt.Errorf("rpc: no method: %s", path)}
 	}
 	req.Method = path[index+1:]
 	err := json.NewDecoder(r.Body).Decode(&req.Params)
@@ -83,17 +83,17 @@ func newCodecRequest(r *http.Request) rpc.CodecRequest {
 	if err != io.EOF {
 		errr = err
 	}
-	return &CodecRequest{request: *req, err: errr}
+	return &CodecRequest{request: req, err: errr}
 }
 
 // CodecRequest decodes and encodes a single request.
 type CodecRequest struct {
-	request ServerRequest
+	request *ServerRequest
 	err     error
 }
 
 func (c *CodecRequest) GetFullRequest() interface{} {
-	return &c.request
+	return c.request
 }
 
 // Method returns the RPC method for the current request.
