@@ -87,7 +87,7 @@ type MockCodecRequest struct {
 }
 
 func (c MockCodecRequest) GetFullRequest() interface{} {
-	return &c.A
+	return &ServerRequest{}
 }
 
 func (r MockCodecRequest) Method() (string, error) {

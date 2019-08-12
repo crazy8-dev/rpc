@@ -76,8 +76,8 @@ func (m *serviceMap) register(rcvr interface{}, name string) error {
 		if method.PkgPath != "" {
 			continue
 		}
-		// Method needs four ins: receiver, *http.Request, *args, *reply.
-		if mtype.NumIn() != 4 {
+		// Method needs five ins: receiver, *http.Request, *args, fullRequest, *reply.
+		if mtype.NumIn() != 5 {
 			continue
 		}
 		// First argument must be a pointer and must be http.Request.
