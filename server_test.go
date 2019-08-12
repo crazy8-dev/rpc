@@ -6,28 +6,10 @@
 package rpc
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"testing"
 )
-
-// serverRequest represents a JSON-RPC request received by the server.
-type ServerRequest struct {
-	// JSON-RPC protocol.
-	Version string `json:"jsonrpc"`
-
-	// A String containing the name of the method to be invoked.
-	Method string `json:"method"`
-
-	// A Structured value to pass as arguments to the method.
-	Params *json.RawMessage `json:"params,omitempty"`
-
-	// The request id. MUST be a string, number or null.
-	// Our implementation will not do type checking for id.
-	// It will be copied as it is.
-	Id *json.RawMessage `json:"id"`
-}
 
 type Service1Request struct {
 	A int
@@ -41,12 +23,12 @@ type Service1Response struct {
 type Service1 struct {
 }
 
-func (t *Service1) Multiply(r *http.Request, req *Service1Request, fullReq *ServerRequest, res *Service1Response) error {
+func (t *Service1) Multiply(r *http.Request, req *Service1Request, res *Service1Response) error {
 	res.Result = req.A * req.B
 	return nil
 }
 
-func (t *Service1) Add(req *Service1Request, fullReq *ServerRequest, res *Service1Response) error {
+func (t *Service1) Add(req *Service1Request, res *Service1Response) error {
 	res.Result = req.A + req.B
 	return nil
 }
@@ -63,7 +45,7 @@ func TestRegisterService(t *testing.T) {
 	// Inferred name.
 	err = s.RegisterService(service1, "")
 	if err != nil || !s.HasMethod("Service1.Multiply") {
-		t.Errorf(err.Error())
+		t.Errorf("Expected to be registered: Service1.Multiply")
 	}
 	// Provided name.
 	err = s.RegisterService(service1, "Foo")
@@ -115,10 +97,6 @@ type MockCodecRequest struct {
 
 func (r MockCodecRequest) Method() (string, error) {
 	return "Service1.Multiply", nil
-}
-
-func (c MockCodecRequest) GetFullRequest() interface{} {
-	return &ServerRequest{}
 }
 
 func (r MockCodecRequest) ReadRequest(args interface{}) error {

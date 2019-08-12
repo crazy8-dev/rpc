@@ -9,10 +9,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/insolar/rpc"
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/gorilla/rpc"
 )
 
 var null = json.RawMessage([]byte("null"))
@@ -22,11 +23,11 @@ var null = json.RawMessage([]byte("null"))
 // ----------------------------------------------------------------------------
 
 // serverRequest represents a ProtoRPC request received by the server.
-type ServerRequest struct {
+type serverRequest struct {
 	// A String containing the name of the method to be invoked.
 	Method string `json:"method"`
 	// An Array of objects to pass as arguments to the method.
-	Params *json.RawMessage `json:"params,omitempty"`
+	Params *json.RawMessage `json:"params"`
 	// The request id. This can be of any type. It is used to match the
 	// response with the request that it is replying to.
 	Id *json.RawMessage `json:"id"`
@@ -69,7 +70,7 @@ func (c *Codec) NewRequest(r *http.Request) rpc.CodecRequest {
 // newCodecRequest returns a new CodecRequest.
 func newCodecRequest(r *http.Request) rpc.CodecRequest {
 	// Decode the request body and check if RPC method is valid.
-	req := new(ServerRequest)
+	req := new(serverRequest)
 	path := r.URL.Path
 	index := strings.LastIndex(path, "/")
 	if index < 0 {
@@ -87,7 +88,7 @@ func newCodecRequest(r *http.Request) rpc.CodecRequest {
 
 // CodecRequest decodes and encodes a single request.
 type CodecRequest struct {
-	request *ServerRequest
+	request *serverRequest
 	err     error
 }
 
@@ -99,10 +100,6 @@ func (c *CodecRequest) Method() (string, error) {
 		return c.request.Method, nil
 	}
 	return "", c.err
-}
-
-func (c *CodecRequest) GetFullRequest() interface{} {
-	return c.request
 }
 
 // ReadRequest fills the request object for the RPC method.
