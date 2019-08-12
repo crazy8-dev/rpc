@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -77,7 +78,13 @@ func newCodecRequest(r *http.Request) rpc.CodecRequest {
 		return &CodecRequest{request: req, err: fmt.Errorf("rpc: no method: %s", path)}
 	}
 	req.Method = path[index+1:]
-	err := json.NewDecoder(r.Body).Decode(&req.Params)
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return &CodecRequest{body: body, request: req, err: err}
+	}
+	err = json.Unmarshal(body, &req.Params)
+
 	r.Body.Close()
 	var errr error
 	if err != io.EOF {
@@ -88,11 +95,12 @@ func newCodecRequest(r *http.Request) rpc.CodecRequest {
 
 // CodecRequest decodes and encodes a single request.
 type CodecRequest struct {
+	body    []byte
 	request *ServerRequest
 	err     error
 }
 
-func (c *CodecRequest) GetFullRequest() interface{} {
+func (c *CodecRequest) GetRequestBody() []byte {
 	return c.request
 }
 

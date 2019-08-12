@@ -31,7 +31,7 @@ type CodecRequest interface {
 	// Reads the request filling the RPC method args.
 	ReadRequest(interface{}) error
 	// Get request body.
-	GetFullRequest() interface{}
+	GetRequestBody() []byte
 	// Writes the response using the RPC method reply.
 	WriteResponse(http.ResponseWriter, interface{})
 	// Writes an error produced by the server.
@@ -48,6 +48,10 @@ func NewServer() *Server {
 		codecs:   make(map[string]Codec),
 		services: new(serviceMap),
 	}
+}
+
+type RequestBody struct {
+	Raw []byte
 }
 
 // RequestInfo contains all the information we pass to before/after functions
@@ -223,7 +227,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			serviceSpec.rcvr,
 			reflect.ValueOf(r),
 			args,
-			reflect.ValueOf(codecReq.GetFullRequest()),
+			reflect.ValueOf(RequestBody{Raw: codecReq.GetRequestBody()}),
 			reply,
 		})
 	}
