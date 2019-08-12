@@ -24,7 +24,7 @@ var null = json.RawMessage([]byte("null"))
 // ----------------------------------------------------------------------------
 
 // serverRequest represents a ProtoRPC request received by the server.
-type ServerRequest struct {
+type serverRequest struct {
 	// A String containing the name of the method to be invoked.
 	Method string `json:"method"`
 	// An Array of objects to pass as arguments to the method.
@@ -71,7 +71,7 @@ func (c *Codec) NewRequest(r *http.Request) rpc.CodecRequest {
 // newCodecRequest returns a new CodecRequest.
 func newCodecRequest(r *http.Request) rpc.CodecRequest {
 	// Decode the request body and check if RPC method is valid.
-	req := new(ServerRequest)
+	req := new(serverRequest)
 	path := r.URL.Path
 	index := strings.LastIndex(path, "/")
 	if index < 0 {
@@ -96,7 +96,7 @@ func newCodecRequest(r *http.Request) rpc.CodecRequest {
 // CodecRequest decodes and encodes a single request.
 type CodecRequest struct {
 	body    []byte
-	request *ServerRequest
+	request *serverRequest
 	err     error
 }
 

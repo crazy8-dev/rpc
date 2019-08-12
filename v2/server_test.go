@@ -6,29 +6,11 @@
 package rpc
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
 	"testing"
 )
-
-// serverRequest represents a JSON-RPC request received by the server.
-type ServerRequest struct {
-	// JSON-RPC protocol.
-	Version string `json:"jsonrpc"`
-
-	// A String containing the name of the method to be invoked.
-	Method string `json:"method"`
-
-	// A Structured value to pass as arguments to the method.
-	Params *json.RawMessage `json:"params,omitempty"`
-
-	// The request id. MUST be a string, number or null.
-	// Our implementation will not do type checking for id.
-	// It will be copied as it is.
-	Id *json.RawMessage `json:"id"`
-}
 
 type Service1Request struct {
 	A int
