@@ -8,6 +8,7 @@ package json2
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 
@@ -160,24 +161,39 @@ func (c *CodecRequest) Method() (string, error) {
 // generated. The names MUST match exactly, including
 // case, to the method's expected parameters.
 func (c *CodecRequest) ReadRequest(args interface{}) error {
-	if c.err == nil && c.request.Params != nil {
-		// Note: if c.request.Params is nil it's not an error, it's an optional member.
-		// JSON params structured object. Unmarshal to the args object.
-		if err := json.Unmarshal(*c.request.Params, args); err != nil {
-			// Clearly JSON params is not a structured object,
-			// fallback and attempt an unmarshal with JSON params as
-			// array value and RPC params is struct. Unmarshal into
-			// array containing the request struct.
-			params := [1]interface{}{args}
-			if err = json.Unmarshal(*c.request.Params, &params); err != nil {
-				c.err = &Error{
-					Code:    E_INVALID_REQ,
-					Message: err.Error(),
-					Data:    c.request.Params,
-				}
+	switch args.(type) {
+	case json.RawMessage:
+		args = &c.request.Params
+	default:
+		body := *c.request.Params
+		_ = json.Unmarshal(body, &c.request.Params)
+		if c.err == nil {
+			if c.request.Params != nil {
+				c.err = json.Unmarshal(*c.request.Params, args)
+			} else {
+				c.err = errors.New("rpc: method request ill-formed: missing params field")
 			}
 		}
+		return c.err
 	}
+	//if c.err == nil && c.request.Params != nil {
+	//	// Note: if c.request.Params is nil it's not an error, it's an optional member.
+	//	// JSON params structured object. Unmarshal to the args object.
+	//	if err := json.Unmarshal(*c.request.Params, args); err != nil {
+	//		// Clearly JSON params is not a structured object,
+	//		// fallback and attempt an unmarshal with JSON params as
+	//		// array value and RPC params is struct. Unmarshal into
+	//		// array containing the request struct.
+	//		params := [1]interface{}{args}
+	//		if err = json.Unmarshal(*c.request.Params, &params); err != nil {
+	//			c.err = &Error{
+	//				Code:    E_INVALID_REQ,
+	//				Message: err.Error(),
+	//				Data:    c.request.Params,
+	//			}
+	//		}
+	//	}
+	//}
 	return c.err
 }
 
