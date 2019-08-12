@@ -14,7 +14,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gorilla/rpc/v2"
+	"github.com/insolar/rpc/v2"
 )
 
 var (
@@ -37,7 +37,7 @@ type Service1Response struct {
 type Service1 struct {
 }
 
-func (t *Service1) Multiply(r *http.Request, req *Service1Request, res *Service1Response) error {
+func (t *Service1) Multiply(r *http.Request, req *Service1Request, fullReq *ServerRequest, res *Service1Response) error {
 	res.Result = req.A * req.B
 	return nil
 }

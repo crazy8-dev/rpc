@@ -97,7 +97,7 @@ type Service1 struct {
 
 const Service1DefaultResponse = 9999
 
-func (t *Service1) Multiply(r *http.Request, req *Service1Request, res *Service1Response) error {
+func (t *Service1) Multiply(r *http.Request, req *Service1Request, fullReq *ServerRequest, res *Service1Response) error {
 	if req.A == 0 && req.B == 0 {
 		// Sentinel value for test with no params.
 		res.Result = Service1DefaultResponse

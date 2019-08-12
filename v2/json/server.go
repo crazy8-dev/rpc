@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gorilla/rpc/v2"
+	"github.com/insolar/rpc/v2"
 )
 
 var null = json.RawMessage([]byte("null"))
@@ -31,14 +31,20 @@ func (e *Error) Error() string {
 // Request and Response
 // ----------------------------------------------------------------------------
 
-// serverRequest represents a JSON-RPC request received by the server.
-type serverRequest struct {
+// ServerRequest represents a JSON-RPC request received by the server.
+type ServerRequest struct {
+	// JSON-RPC protocol.
+	Version string `json:"jsonrpc"`
+
 	// A String containing the name of the method to be invoked.
 	Method string `json:"method"`
-	// An Array of objects to pass as arguments to the method.
+
+	// A Structured value to pass as arguments to the method.
 	Params *json.RawMessage `json:"params"`
-	// The request id. This can be of any type. It is used to match the
-	// response with the request that it is replying to.
+
+	// The request id. MUST be a string, number or null.
+	// Our implementation will not do type checking for id.
+	// It will be copied as it is.
 	Id *json.RawMessage `json:"id"`
 }
 
@@ -79,7 +85,7 @@ func (c *Codec) NewRequest(r *http.Request) rpc.CodecRequest {
 // newCodecRequest returns a new CodecRequest.
 func newCodecRequest(r *http.Request) rpc.CodecRequest {
 	// Decode the request body and check if RPC method is valid.
-	req := new(serverRequest)
+	req := new(ServerRequest)
 	err := json.NewDecoder(r.Body).Decode(req)
 	r.Body.Close()
 	return &CodecRequest{request: req, err: err}
@@ -87,8 +93,12 @@ func newCodecRequest(r *http.Request) rpc.CodecRequest {
 
 // CodecRequest decodes and encodes a single request.
 type CodecRequest struct {
-	request *serverRequest
+	request *ServerRequest
 	err     error
+}
+
+func (c *CodecRequest) GetFullRequest() interface{} {
+	return &c.request
 }
 
 // Method returns the RPC method for the current request.

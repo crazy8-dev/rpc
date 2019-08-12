@@ -13,7 +13,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gorilla/rpc"
+	"github.com/insolar/rpc"
 )
 
 var ErrResponseError = errors.New("response error")
@@ -34,7 +34,7 @@ type Service1Response struct {
 type Service1 struct {
 }
 
-func (t *Service1) Multiply(r *http.Request, req *Service1Request, res *Service1Response) error {
+func (t *Service1) Multiply(r *http.Request, req *Service1Request, fullReq *ServerRequest, res *Service1Response) error {
 	res.Result = req.A * req.B
 	return nil
 }

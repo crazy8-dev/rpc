@@ -14,7 +14,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gorilla/rpc"
+	"github.com/insolar/rpc"
 )
 
 var ErrResponseError = errors.New("response error")
@@ -36,16 +36,16 @@ type Service1 struct {
 	beforeAfterContext map[string]string
 }
 
-func (t *Service1) Multiply(r *http.Request, req *Service1Request, res *Service1Response) error {
+func (t *Service1) Multiply(r *http.Request, req *Service1Request, fullReq *ServerRequest, res *Service1Response) error {
 	res.Result = req.A * req.B
 	return nil
 }
 
-func (t *Service1) ResponseError(r *http.Request, req *Service1Request, res *Service1Response) error {
+func (t *Service1) ResponseError(r *http.Request, req *Service1Request, fullReq *ServerRequest, res *Service1Response) error {
 	return ErrResponseError
 }
 
-func (t *Service1) BeforeAfter(r *http.Request, req *Service1Request, res *Service1Response) error {
+func (t *Service1) BeforeAfter(r *http.Request, req *Service1Request, fullReq *ServerRequest, res *Service1Response) error {
 	if _, ok := t.beforeAfterContext["before"]; !ok {
 		return fmt.Errorf("before value not found in context")
 	}
