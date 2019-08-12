@@ -42,11 +42,11 @@ func (t *Service1) Multiply(r *http.Request, req *Service1Request, fullReq *Serv
 	return nil
 }
 
-func (t *Service1) ResponseError(r *http.Request, req *Service1Request, res *Service1Response) error {
+func (t *Service1) ResponseError(r *http.Request, req *Service1Request, fullReq *ServerRequest, res *Service1Response) error {
 	return ErrResponseError
 }
 
-func (t *Service1) ResponseJsonError(r *http.Request, req *Service1Request, res *Service1Response) error {
+func (t *Service1) ResponseJsonError(r *http.Request, req *Service1Request, fullReq *ServerRequest, res *Service1Response) error {
 	return ErrResponseJsonError
 }
 
@@ -91,13 +91,13 @@ func TestService(t *testing.T) {
 	s.RegisterService(new(Service1), "")
 
 	var res Service1Response
-	if err := execute(t, s, "Service1.Multiply", &Service1Request{4, 2}, &res); err != nil {
+	if err := execute(t, s, "Service1.multiply", &Service1Request{4, 2}, &res); err != nil {
 		t.Error("Expected err to be nil, but got", err)
 	}
 	if res.Result != 8 {
 		t.Error("Expected res.Result to be 8, but got", res.Result)
 	}
-	if err := execute(t, s, "Service1.ResponseError", &Service1Request{4, 2}, &res); err == nil {
+	if err := execute(t, s, "Service1.responseError", &Service1Request{4, 2}, &res); err == nil {
 		t.Errorf("Expected to get %q, but got nil", ErrResponseError)
 	} else if err.Error() != ErrResponseError.Error() {
 		t.Errorf("Expected to get %q, but got %q", ErrResponseError, err)
@@ -107,7 +107,7 @@ func TestService(t *testing.T) {
 	} else if v, ok := field("result", res.Bytes()); !ok || v != nil {
 		t.Errorf("Expected ok to be true and v to be nil, but got %v and %v", ok, v)
 	}
-	if err := execute(t, s, "Service1.ResponseJsonError", &Service1Request{4, 2}, &res); err == nil {
+	if err := execute(t, s, "Service1.responseJsonError", &Service1Request{4, 2}, &res); err == nil {
 		t.Errorf("Expected to get %q, but got nil", ErrResponseError)
 	} else if jsonErr, ok := err.(*Error); !ok {
 		t.Error("Expected err to be of a *json.Error type")

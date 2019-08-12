@@ -13,7 +13,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gorilla/rpc/v2"
+	"github.com/insolar/rpc/v2"
 )
 
 var null = json.RawMessage([]byte("null"))
@@ -22,8 +22,8 @@ var null = json.RawMessage([]byte("null"))
 // Request and Response
 // ----------------------------------------------------------------------------
 
-// serverRequest represents a ProtoRPC request received by the server.
-type serverRequest struct {
+// ServerRequest represents a ProtoRPC request received by the server.
+type ServerRequest struct {
 	// A String containing the name of the method to be invoked.
 	Method string `json:"method"`
 	// An Array of objects to pass as arguments to the method.
@@ -70,11 +70,11 @@ func (c *Codec) NewRequest(r *http.Request) rpc.CodecRequest {
 // newCodecRequest returns a new CodecRequest.
 func newCodecRequest(r *http.Request) rpc.CodecRequest {
 	// Decode the request body and check if RPC method is valid.
-	req := new(serverRequest)
+	req := new(ServerRequest)
 	path := r.URL.Path
 	index := strings.LastIndex(path, "/")
 	if index < 0 {
-		return &CodecRequest{request: req, err: fmt.Errorf("rpc: no method: %s", path)}
+		return &CodecRequest{request: *req, err: fmt.Errorf("rpc: no method: %s", path)}
 	}
 	req.Method = path[index+1:]
 	err := json.NewDecoder(r.Body).Decode(&req.Params)
@@ -83,13 +83,17 @@ func newCodecRequest(r *http.Request) rpc.CodecRequest {
 	if err != io.EOF {
 		errr = err
 	}
-	return &CodecRequest{request: req, err: errr}
+	return &CodecRequest{request: *req, err: errr}
 }
 
 // CodecRequest decodes and encodes a single request.
 type CodecRequest struct {
-	request *serverRequest
+	request ServerRequest
 	err     error
+}
+
+func (c *CodecRequest) GetFullRequest() interface{} {
+	return &c.request
 }
 
 // Method returns the RPC method for the current request.

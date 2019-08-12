@@ -118,12 +118,12 @@ func newCodecRequest(r *http.Request, encoder rpc.Encoder, errorMapper func(erro
 	}
 
 	r.Body.Close()
-	return &CodecRequest{request: req, err: err, encoder: encoder, errorMapper: errorMapper}
+	return &CodecRequest{request: *req, err: err, encoder: encoder, errorMapper: errorMapper}
 }
 
 // CodecRequest decodes and encodes a single request.
 type CodecRequest struct {
-	request     *ServerRequest
+	request     ServerRequest
 	err         error
 	encoder     rpc.Encoder
 	errorMapper func(error) error

@@ -14,7 +14,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gorilla/rpc/v2"
+	"github.com/insolar/rpc/v2"
 )
 
 const jsonContentType = "application/json; charset=utf-8"
@@ -42,7 +42,7 @@ func (t *Service1) Multiply(r *http.Request, req *Service1Request, fullReq *Serv
 	return nil
 }
 
-func (t *Service1) ResponseError(r *http.Request, req *Service1Request, res *Service1Response) error {
+func (t *Service1) ResponseError(r *http.Request, req *Service1Request, fullReq *ServerRequest, res *Service1Response) error {
 	return ErrResponseError
 }
 
@@ -69,7 +69,7 @@ func TestService(t *testing.T) {
 	s.RegisterService(new(Service1), "")
 
 	var res Service1Response
-	if _, err := execute(t, s, "Service1.Multiply", &Service1Request{4, 2}, &res); err != nil {
+	if _, err := execute(t, s, "Service1.multiply", &Service1Request{4, 2}, &res); err != nil {
 		t.Error("Expected err to be nil, but got:", err)
 	}
 	if res.Result != 8 {
@@ -78,7 +78,7 @@ func TestService(t *testing.T) {
 	if res.ErrorMessage != "" {
 		t.Error("Expected error_message to be empty, but got:", res.ErrorMessage)
 	}
-	if rec, err := execute(t, s, "Service1.ResponseError", &Service1Request{4,
+	if rec, err := execute(t, s, "Service1.responseError", &Service1Request{4,
 		2}, &res); err != nil || rec.Code != 400 {
 		t.Errorf("Expected code to be 400 and error to be nil, but got %v (%v)",
 			rec.Code, err)
@@ -86,10 +86,10 @@ func TestService(t *testing.T) {
 	if res.ErrorMessage == "" {
 		t.Errorf("Expected error_message to be %q, but got %q", ErrResponseError, res.ErrorMessage)
 	}
-	if rec, _ := execute(t, s, "Service1.Multiply", nil, &res); rec.Code != 400 {
+	if rec, _ := execute(t, s, "Service1.multiply", nil, &res); rec.Code != 400 {
 		t.Error("Expected http response code 400, but got", rec.Code)
 	}
-	if rec, _ := execute(t, s, "Service1.Multiply", nil, &res); !strings.Contains(rec.Header().Get("Content-Type"), jsonContentType) {
+	if rec, _ := execute(t, s, "Service1.multiply", nil, &res); !strings.Contains(rec.Header().Get("Content-Type"), jsonContentType) {
 		t.Errorf("Expected Content-Type header %q, but got %q", jsonContentType,
 			rec.Header().Get("Content-Type"))
 	}

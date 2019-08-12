@@ -88,12 +88,12 @@ func newCodecRequest(r *http.Request) rpc.CodecRequest {
 	req := new(ServerRequest)
 	err := json.NewDecoder(r.Body).Decode(req)
 	r.Body.Close()
-	return &CodecRequest{request: req, err: err}
+	return &CodecRequest{request: *req, err: err}
 }
 
 // CodecRequest decodes and encodes a single request.
 type CodecRequest struct {
-	request *ServerRequest
+	request ServerRequest
 	err     error
 }
 
