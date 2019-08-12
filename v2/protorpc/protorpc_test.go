@@ -37,12 +37,12 @@ type Service1Response struct {
 type Service1 struct {
 }
 
-func (t *Service1) Multiply(r *http.Request, req *Service1Request, fullReq *ServerRequest, res *Service1Response) error {
+func (t *Service1) Multiply(r *http.Request, req *Service1Request, requestBody *rpc.RequestBody, res *Service1Response) error {
 	res.Result = req.A * req.B
 	return nil
 }
 
-func (t *Service1) ResponseError(r *http.Request, req *Service1Request, fullReq *ServerRequest, res *Service1Response) error {
+func (t *Service1) ResponseError(r *http.Request, req *Service1Request, requestBody *rpc.RequestBody, res *Service1Response) error {
 	return ErrResponseError
 }
 

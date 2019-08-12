@@ -32,8 +32,8 @@ func (e *Error) Error() string {
 // Request and Response
 // ----------------------------------------------------------------------------
 
-// ServerRequest represents a JSON-RPC request received by the server.
-type ServerRequest struct {
+// serverRequest represents a JSON-RPC request received by the server.
+type serverRequest struct {
 	// JSON-RPC protocol.
 	Version string `json:"jsonrpc"`
 
@@ -86,7 +86,7 @@ func (c *Codec) NewRequest(r *http.Request) rpc.CodecRequest {
 // newCodecRequest returns a new CodecRequest.
 func newCodecRequest(r *http.Request) rpc.CodecRequest {
 	// Decode the request body and check if RPC method is valid.
-	req := new(ServerRequest)
+	req := new(serverRequest)
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return &CodecRequest{body: body, request: req, err: err}
@@ -99,7 +99,7 @@ func newCodecRequest(r *http.Request) rpc.CodecRequest {
 // CodecRequest decodes and encodes a single request.
 type CodecRequest struct {
 	body    []byte
-	request *ServerRequest
+	request *serverRequest
 	err     error
 }
 

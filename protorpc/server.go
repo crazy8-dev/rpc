@@ -21,7 +21,7 @@ var null = json.RawMessage([]byte("null"))
 // Request and Response
 // ----------------------------------------------------------------------------
 
-// ServerRequest represents a ProtoRPC request received by the server.
+// serverRequest represents a ProtoRPC request received by the server.
 type ServerRequest struct {
 	// A String containing the name of the method to be invoked.
 	Method string `json:"method"`

@@ -227,7 +227,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			serviceSpec.rcvr,
 			reflect.ValueOf(r),
 			args,
-			reflect.ValueOf(RequestBody{Raw: codecReq.GetRequestBody()}),
+			reflect.ValueOf(&RequestBody{Raw: codecReq.GetRequestBody()}),
 			reply,
 		})
 	}

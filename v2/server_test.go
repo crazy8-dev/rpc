@@ -13,7 +13,7 @@ import (
 	"testing"
 )
 
-// ServerRequest represents a JSON-RPC request received by the server.
+// serverRequest represents a JSON-RPC request received by the server.
 type ServerRequest struct {
 	// JSON-RPC protocol.
 	Version string `json:"jsonrpc"`
