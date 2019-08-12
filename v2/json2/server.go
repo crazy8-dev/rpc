@@ -6,7 +6,9 @@
 package json2
 
 import (
+	"bytes"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/insolar/rpc/v2"
@@ -101,7 +103,8 @@ func (c *Codec) NewRequest(r *http.Request) rpc.CodecRequest {
 func newCodecRequest(r *http.Request, encoder rpc.Encoder, errorMapper func(error) error) rpc.CodecRequest {
 	// Decode the request body and check if RPC method is valid.
 	req := new(serverRequest)
-	err := json.NewDecoder(r.Body).Decode(req)
+	var bodyBytes []byte
+	bodyBytes, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
 		err = &Error{
@@ -116,6 +119,10 @@ func newCodecRequest(r *http.Request, encoder rpc.Encoder, errorMapper func(erro
 			Data:    req,
 		}
 	}
+	// Restore the io.ReadCloser to its original state
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
+	req.Params = (*json.RawMessage)(&bodyBytes)
 
 	r.Body.Close()
 	return &CodecRequest{request: req, err: err, encoder: encoder, errorMapper: errorMapper}
