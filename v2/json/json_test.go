@@ -14,7 +14,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gorilla/rpc/v2"
+	"github.com/insolar/rpc/v2"
 )
 
 var (
@@ -91,23 +91,23 @@ func TestService(t *testing.T) {
 	s.RegisterService(new(Service1), "")
 
 	var res Service1Response
-	if err := execute(t, s, "Service1.Multiply", &Service1Request{4, 2}, &res); err != nil {
+	if err := execute(t, s, "Service1.multiply", &Service1Request{4, 2}, &res); err != nil {
 		t.Error("Expected err to be nil, but got", err)
 	}
 	if res.Result != 8 {
 		t.Error("Expected res.Result to be 8, but got", res.Result)
 	}
-	if err := execute(t, s, "Service1.ResponseError", &Service1Request{4, 2}, &res); err == nil {
+	if err := execute(t, s, "Service1.responseError", &Service1Request{4, 2}, &res); err == nil {
 		t.Errorf("Expected to get %q, but got nil", ErrResponseError)
 	} else if err.Error() != ErrResponseError.Error() {
 		t.Errorf("Expected to get %q, but got %q", ErrResponseError, err)
 	}
-	if code, res := executeRaw(t, s, json.RawMessage(`{"method":"Service1.Multiply","params":null,"id":5}`)); code != 400 {
+	if code, res := executeRaw(t, s, json.RawMessage(`{"method":"Service1.multiply","params":null,"id":5}`)); code != 400 {
 		t.Error("Expected response code to be 400, but got", code)
 	} else if v, ok := field("result", res.Bytes()); !ok || v != nil {
 		t.Errorf("Expected ok to be true and v to be nil, but got %v and %v", ok, v)
 	}
-	if err := execute(t, s, "Service1.ResponseJsonError", &Service1Request{4, 2}, &res); err == nil {
+	if err := execute(t, s, "Service1.responseJsonError", &Service1Request{4, 2}, &res); err == nil {
 		t.Errorf("Expected to get %q, but got nil", ErrResponseError)
 	} else if jsonErr, ok := err.(*Error); !ok {
 		t.Error("Expected err to be of a *json.Error type")
