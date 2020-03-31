@@ -10,10 +10,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strings"
 
-	"github.com/gorilla/rpc/v2"
+	"github.com/insolar/rpc/v2"
 )
 
 var null = json.RawMessage([]byte("null"))
@@ -27,7 +28,7 @@ type serverRequest struct {
 	// A String containing the name of the method to be invoked.
 	Method string `json:"method"`
 	// An Array of objects to pass as arguments to the method.
-	Params *json.RawMessage `json:"params"`
+	Params *json.RawMessage `json:"params,omitempty"`
 	// The request id. This can be of any type. It is used to match the
 	// response with the request that it is replying to.
 	Id *json.RawMessage `json:"id"`
@@ -77,8 +78,14 @@ func newCodecRequest(r *http.Request) rpc.CodecRequest {
 		return &CodecRequest{request: req, err: fmt.Errorf("rpc: no method: %s", path)}
 	}
 	req.Method = path[index+1:]
-	err := json.NewDecoder(r.Body).Decode(&req.Params)
+
+	body, err := ioutil.ReadAll(r.Body)
 	r.Body.Close()
+	if err != nil {
+		return &CodecRequest{body: body, request: req, err: err}
+	}
+	err = json.Unmarshal(body, &req.Params)
+
 	var errr error
 	if err != io.EOF {
 		errr = err
@@ -88,8 +95,13 @@ func newCodecRequest(r *http.Request) rpc.CodecRequest {
 
 // CodecRequest decodes and encodes a single request.
 type CodecRequest struct {
+	body    []byte
 	request *serverRequest
 	err     error
+}
+
+func (c *CodecRequest) GetRequestBody() []byte {
+	return c.body
 }
 
 // Method returns the RPC method for the current request.

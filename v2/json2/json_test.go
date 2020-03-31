@@ -97,7 +97,7 @@ type Service1 struct {
 
 const Service1DefaultResponse = 9999
 
-func (t *Service1) Multiply(r *http.Request, req *Service1Request, res *Service1Response) error {
+func (t *Service1) Multiply(r *http.Request, req *Service1Request, requestBody *rpc.RequestBody, res *Service1Response) error {
 	if req.A == 0 && req.B == 0 {
 		// Sentinel value for test with no params.
 		res.Result = Service1DefaultResponse
@@ -107,11 +107,11 @@ func (t *Service1) Multiply(r *http.Request, req *Service1Request, res *Service1
 	return nil
 }
 
-func (t *Service1) ResponseError(r *http.Request, req *Service1Request, res *Service1Response) error {
+func (t *Service1) ResponseError(r *http.Request, req *Service1Request, requestBody *rpc.RequestBody, res *Service1Response) error {
 	return ErrResponseError
 }
 
-func (t *Service1) MappedResponseError(r *http.Request, req *Service1Request, res *Service1Response) error {
+func (t *Service1) MappedResponseError(r *http.Request, req *Service1Request, requestBody *rpc.RequestBody, res *Service1Response) error {
 	return ErrMappedResponseError
 }
 
@@ -158,14 +158,14 @@ func TestService(t *testing.T) {
 	s.RegisterService(new(Service1), "")
 
 	var res Service1Response
-	if err := execute(t, s, "Service1.Multiply", &Service1Request{4, 2}, &res); err != nil {
+	if err := execute(t, s, "Service1.multiply", &Service1Request{4, 2}, &res); err != nil {
 		t.Error("Expected err to be nil, but got:", err)
 	}
 	if res.Result != 8 {
 		t.Errorf("Wrong response: %v.", res.Result)
 	}
 
-	if err := execute(t, s, "Service1.ResponseError", &Service1Request{4, 2}, &res); err == nil {
+	if err := execute(t, s, "Service1.responseError", &Service1Request{4, 2}, &res); err == nil {
 		t.Errorf("Expected to get %q, but got nil", ErrResponseError)
 	} else if err.Error() != ErrResponseError.Error() {
 		t.Errorf("Expected to get %q, but got %q", ErrResponseError, err)
@@ -173,7 +173,7 @@ func TestService(t *testing.T) {
 
 	// No parameters.
 	res = Service1Response{}
-	if err := executeRaw(t, s, &Service1NoParamsRequest{"2.0", "Service1.Multiply", 1}, &res); err != nil {
+	if err := executeRaw(t, s, &Service1NoParamsRequest{"2.0", "Service1.multiply", 1}, &res); err != nil {
 		t.Error(err)
 	}
 	if res.Result != Service1DefaultResponse {
@@ -189,7 +189,7 @@ func TestService(t *testing.T) {
 		}{{
 			T: "test",
 		}},
-		M:  "Service1.Multiply",
+		M:  "Service1.multiply",
 		ID: 1,
 	}
 	if err := executeRaw(t, s, &req, &res); err != nil {
@@ -232,7 +232,7 @@ func TestServiceWithErrorMapper(t *testing.T) {
 	s.RegisterService(new(Service1), "")
 
 	var res Service1Response
-	if err := execute(t, s, "Service1.MappedResponseError", &Service1Request{4, 2}, &res); err == nil {
+	if err := execute(t, s, "Service1.mappedResponseError", &Service1Request{4, 2}, &res); err == nil {
 		t.Errorf("Expected to get a JSON-RPC error, but got nil")
 	} else if jsonRpcErr, ok := err.(*Error); !ok {
 		t.Errorf("Expected to get an *Error, but got %T: %s", err, err)
@@ -243,7 +243,7 @@ func TestServiceWithErrorMapper(t *testing.T) {
 	}
 
 	// Unmapped error behaves as usual
-	if err := execute(t, s, "Service1.ResponseError", &Service1Request{4, 2}, &res); err == nil {
+	if err := execute(t, s, "Service1.responseError", &Service1Request{4, 2}, &res); err == nil {
 		t.Errorf("Expected to get a JSON-RPC error, but got nil")
 	} else if jsonRpcErr, ok := err.(*Error); !ok {
 		t.Errorf("Expected to get an *Error, but got %T: %s", err, err)

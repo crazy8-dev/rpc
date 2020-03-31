@@ -7,6 +7,7 @@ package json2
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/insolar/rpc/v2"
@@ -28,7 +29,7 @@ type serverRequest struct {
 	Method string `json:"method"`
 
 	// A Structured value to pass as arguments to the method.
-	Params *json.RawMessage `json:"params"`
+	Params *json.RawMessage `json:"params,omitempty"`
 
 	// The request id. MUST be a string, number or null.
 	// Our implementation will not do type checking for id.
@@ -101,7 +102,12 @@ func (c *Codec) NewRequest(r *http.Request) rpc.CodecRequest {
 func newCodecRequest(r *http.Request, encoder rpc.Encoder, errorMapper func(error) error) rpc.CodecRequest {
 	// Decode the request body and check if RPC method is valid.
 	req := new(serverRequest)
-	err := json.NewDecoder(r.Body).Decode(req)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return &CodecRequest{body: body, request: req, err: err, encoder: encoder, errorMapper: errorMapper}
+	}
+	r.Body.Close()
+	err = json.Unmarshal(body, req)
 
 	if err != nil {
 		err = &Error{
@@ -117,16 +123,20 @@ func newCodecRequest(r *http.Request, encoder rpc.Encoder, errorMapper func(erro
 		}
 	}
 
-	r.Body.Close()
-	return &CodecRequest{request: req, err: err, encoder: encoder, errorMapper: errorMapper}
+	return &CodecRequest{body: body, request: req, err: err, encoder: encoder, errorMapper: errorMapper}
 }
 
 // CodecRequest decodes and encodes a single request.
 type CodecRequest struct {
+	body        []byte
 	request     *serverRequest
 	err         error
 	encoder     rpc.Encoder
 	errorMapper func(error) error
+}
+
+func (c *CodecRequest) GetRequestBody() []byte {
+	return c.body
 }
 
 // Method returns the RPC method for the current request.

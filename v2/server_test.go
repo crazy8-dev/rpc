@@ -24,7 +24,7 @@ type Service1Response struct {
 type Service1 struct {
 }
 
-func (t *Service1) Multiply(r *http.Request, req *Service1Request, res *Service1Response) error {
+func (t *Service1) Multiply(r *http.Request, req *Service1Request, rawBody *RequestBody, res *Service1Response) error {
 	res.Result = req.A * req.B
 	return nil
 }
@@ -66,6 +66,10 @@ func (c MockCodec) NewRequest(*http.Request) CodecRequest {
 
 type MockCodecRequest struct {
 	A, B int
+}
+
+func (c MockCodecRequest) GetRequestBody() []byte {
+	return []byte{}
 }
 
 func (r MockCodecRequest) Method() (string, error) {

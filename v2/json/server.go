@@ -9,9 +9,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
-	"github.com/gorilla/rpc/v2"
+	"github.com/insolar/rpc/v2"
 )
 
 var null = json.RawMessage([]byte("null"))
@@ -80,15 +81,24 @@ func (c *Codec) NewRequest(r *http.Request) rpc.CodecRequest {
 func newCodecRequest(r *http.Request) rpc.CodecRequest {
 	// Decode the request body and check if RPC method is valid.
 	req := new(serverRequest)
-	err := json.NewDecoder(r.Body).Decode(req)
+	body, err := ioutil.ReadAll(r.Body)
 	r.Body.Close()
-	return &CodecRequest{request: req, err: err}
+	if err != nil {
+		return &CodecRequest{body: body, request: req, err: err}
+	}
+	err = json.Unmarshal(body, req)
+	return &CodecRequest{body: body, request: req, err: err}
 }
 
 // CodecRequest decodes and encodes a single request.
 type CodecRequest struct {
+	body    []byte
 	request *serverRequest
 	err     error
+}
+
+func (c *CodecRequest) GetRequestBody() []byte {
+	return c.body
 }
 
 // Method returns the RPC method for the current request.

@@ -45,6 +45,10 @@ func NewServer() *Server {
 	}
 }
 
+type RequestBody struct {
+	Raw []byte
+}
+
 // RequestInfo contains all the information we pass to before/after functions
 type RequestInfo struct {
 	Method     string
